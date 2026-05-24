@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Architecture Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme: 'default'});</script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; text-align: center; background-color: #f8f9fa; }
+        .mermaid { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: inline-block; }
+        h1 { color: #333; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+
+    <h1>🏛️ Property Insurance AI Copilot Architecture</h1>
+    
+    <div class="mermaid">
+        graph TD
+            A[👤 User Query] -->|POST /chat| B(⚡ FastAPI Gateway)
+            B --> C((🧠 Orchestrator))
+            C --> D[👁️ Vision Agent]
+            D --> E[💾 Memory Extraction]
+            E --> F[🔍 Intent Classifier]
+            F --> G{🛠️ Tool Dispatcher}
+            
+            G -->|POLICY_Q_A| T1[FAISS Vector DB]
+            G -->|COST_ESTIMATION| T2[Repair Cost CSV]
+            G -->|CONTRACTOR_LOOKUP| T3[Contractor CSV]
+            G -->|CLAIM_STATUS| T4[Claim Tracker]
+            G -->|OUT_OF_SCOPE| T5[Bypass Tools]
+
+            T1 --> H
+            T2 --> H
+            T3 --> H
+            T4 --> H
+            T5 --> H
+
+            H[✍️ Synthesis Agent] --> I[🛡️ Guardrail Evaluator]
+            I -->|Safe| J[💬 Stream to User]
+            I -->|Unsafe| K[🛑 Rewrite Answer]
+            K --> J
+    </div>
+
+</body>
+</html>

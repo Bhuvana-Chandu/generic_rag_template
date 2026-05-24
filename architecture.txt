@@ -1,0 +1,46 @@
+PROPERTY INSURANCE AI COPILOT - ARCHITECTURE FLOW
+=================================================
+
+[User Query]
+    |
+    | (POST /chat)
+    v
+[FastAPI Gateway]
+    |
+    v
+(Orchestrator State Machine)
+    |
+    v
+[Vision Agent] 
+    (Analyzes uploaded images for damage descriptions)
+    |
+    v
+[Memory Extraction] 
+    (Extracts details like postcode, damage type to Memory Context)
+    |
+    v
+[Intent Classifier] 
+    (Classifies query into exactly one of 5 categories)
+    |
+    v
+[Tool Dispatcher]
+    |
+    +--- (If POLICY_Q_A) --------> [FAISS Vector DB]
+    +--- (If COST_ESTIMATION) ---> [Repair Cost CSV Database]
+    +--- (If CONTRACTOR_LOOKUP) -> [Contractor CSV Database]
+    +--- (If CLAIM_STATUS) ------> [Claim Status Tracker]
+    +--- (If OUT_OF_SCOPE) ------> [Bypass Tools]
+    |
+    v
+(Tool outputs raw data context)
+    |
+    v
+[Synthesis Agent] 
+    (Writes a conversational answer using the raw data context)
+    |
+    v
+[Guardrail Evaluator] 
+    (Checks if answer makes unsafe financial promises)
+    |
+    +--- (If Unsafe) ---> [Rewrite Answer] ---> [Stream to User]
+    +--- (If Safe) ---------------------------> [Stream to User]

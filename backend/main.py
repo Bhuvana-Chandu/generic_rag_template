@@ -83,9 +83,12 @@ class StreamlitProxyMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(StreamlitProxyMiddleware)
 
+from orchestration.tools import preload_tools
+
 @app.on_event("startup")
 async def startup_event():
     logger.info("Initializing pipeline on startup...")
+    preload_tools()
     logger.info("Starting Streamlit frontend sidecar...")
     subprocess.Popen([
         sys.executable, "-m", "streamlit", "run", "frontend/app.py", 

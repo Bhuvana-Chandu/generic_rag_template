@@ -20,14 +20,14 @@ def preload_tools():
         _vector_store = FAISS.load_local(faiss_path, OpenAIEmbeddings(), allow_dangerous_deserialization=True)
         
     try:
-        _repair_costs_df = pd.read_csv(os.path.join(data_dir, "repair_cost_table.csv"))
-    except:
-        pass
+        _repair_costs_df = pd.read_csv(os.path.join(data_dir, "PropertyDamage_RepairCostTable.csv"))
+    except Exception as e:
+        print("Failed to load repair cost csv:", e)
         
     try:
-        _contractors_df = pd.read_csv(os.path.join(data_dir, "contractor_network.csv"))
-    except:
-        pass
+        _contractors_df = pd.read_csv(os.path.join(data_dir, "ApprovedContractor_Network.csv"))
+    except Exception as e:
+        print("Failed to load contractor network csv:", e)
 
 @tool
 def policy_rag_retriever(query: str) -> str:
@@ -77,16 +77,17 @@ def contractor_network_lookup(postcode: str, trade_type: str, policy_tier: str) 
     # In a real system, postcode would do geographic matching. Here we mock it by just using the first letter if provided.
     area = postcode[0].upper() if postcode else ""
     
-    # Filter by trade
-    matches = df[df['trade_type'].str.lower() == trade_type.lower()]
+    # Filter by trade (Fuzzy match to handle "plumbing" vs "plumbing & heating")
+    trade_search = trade_type.lower().replace(" and ", " & ")
+    matches = df[df['trade_type'].str.lower().str.contains(trade_search, na=False) | df['trade_type'].str.lower().str.contains(trade_type.lower().split()[0], na=False)]
     
     if matches.empty:
-        return f"No contractors found for trade: {trade_type}."
+        return f"No approved contractors found for the requested trade: '{trade_type}'. Please check directory."
         
     # Format the results
     results = []
     for _, row in matches.iterrows():
-        results.append(f"- {row['contractor_name']} (Tier: {row['tier_approval']}, Area: {row['coverage_area']}, Contact: {row['contact']})")
+        results.append(f"- {row['company_name']} (Tier: {row['tier_approved']}, Area: {row['city_region']}, Phone: {row['phone']}, Email: {row['email']})")
         
     return f"Approved contractors for {trade_type}:\n" + "\n".join(results)
 
